@@ -1,13 +1,9 @@
-# 🔥 Virtualenv direta (dentro de api/)
-Lib/
-Scripts/
-Include/
-pyvenv.cfg
-
-# 🔥 Virtualenv aninhada
+# 🔥 Virtualenv (independente de onde esteja)
 venv/
 .venv/
 env/
+
+# 🔥 Qualquer estrutura de venv (como a tua)
 */Lib/
 */Scripts/
 */Include/
@@ -41,5 +37,4 @@ build/
 dist/
 *.egg-info/
 
-# 🔹 Prompts
 prompts/
