@@ -1,0 +1,6 @@
+from .constantes import (
+    PADRES_ALTA_COBERTURA,
+    PADRES_MEDIA_COBERTURA,
+    PADRES_BAIXA_COBERTURA,
+    TODOS_PADRES,
+)

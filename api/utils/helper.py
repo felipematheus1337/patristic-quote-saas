@@ -1,8 +1,55 @@
 import json
 import re
 
+# Fontes por tipo de padre
+FONTES_PATRISTICAS = [
+    "catenabible.com",
+    "newadvent.org",
+    "ccel.org",
+    "documentacatholicaomnia.eu",
+]
+
+FONTES_MODERNAS_CATOLICAS = [
+    "vatican.va",
+    "papalencyclicals.net",
+]
+
+FONTES_MODERNAS_ORTODOXAS = [
+    "orthodoxinfo.com",
+    "orthodoxchurchquotes.com",
+    "rocorstudies.org",
+]
+
+TODAS_FONTES_AUTORIZADAS = (
+    FONTES_PATRISTICAS
+    + FONTES_MODERNAS_CATOLICAS
+    + FONTES_MODERNAS_ORTODOXAS
+)
+
+ALIASES = {
+    "João Crisóstomo": "São João Crisóstomo",
+    "Crisóstomo": "São João Crisóstomo",
+    "Agostinho de Hipona": "Santo Agostinho de Hipona",
+    "Santo Agostinho": "Santo Agostinho de Hipona",
+    "Agostinho": "Santo Agostinho de Hipona",
+    "Jerônimo": "São Jerônimo",
+    "Tomás de Aquino": "São Tomás de Aquino",
+    "Glossa Ordinária": None,  # None = filtrar fora
+}
+
+def normalizar_nomes(citacoes: list) -> list:
+    normalizadas = []
+    for c in citacoes:
+        nome = c.get("nome", "")
+        if nome in ALIASES:
+            novo_nome = ALIASES[nome]
+            if novo_nome is None:  # filtra Glossa Ordinária e similares
+                continue
+            c["nome"] = novo_nome
+        normalizadas.append(c)
+    return normalizadas
+
 def extract_text_from_response(response) -> str:
-    """Extrai o texto final da resposta, compatível com web search tool."""
     for block in response.output:
         if block.type == "message":
             for content in block.content:
@@ -10,14 +57,19 @@ def extract_text_from_response(response) -> str:
                     return content.text
     return ""
 
-def parse_response(text: str):
-    """Tenta fazer parse do JSON, retornando [] em caso de falha."""
+def parse_response(text: str) -> list:
     if not text.strip():
         print("[AVISO] Resposta vazia do modelo.")
         return []
 
-    cleaned = re.sub(r"```json|```", "", text).strip()
+    match = re.search(r'\[.*?\]', text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group())
+        except json.JSONDecodeError:
+            pass
 
+    cleaned = re.sub(r"```json|```", "", text).strip()
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError as e:
@@ -25,6 +77,12 @@ def parse_response(text: str):
         print(f"[DEBUG] Texto recebido:\n{text[:500]}")
         return []
 
-def load_prompt(path: str):
+def validar_fontes(resultados: list) -> list:
+    return [
+        r for r in resultados
+        if any(dominio in r.get("fonte", "") for dominio in TODAS_FONTES_AUTORIZADAS)
+    ]
+
+def load_prompt(path: str) -> str:
     with open(path, "r", encoding="utf-8") as file:
         return file.read()
