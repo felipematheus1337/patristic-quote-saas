@@ -1,9 +1,21 @@
+from fastapi import APIRouter, HTTPException
 from domain.saint_quote import Saint_Quote, Saint_Quote_Input
-import service as quote_service
-from fastapi import FastAPI
+from application import service as quote_service
 
-app = FastAPI(title="Patristic Quotes")
+router = APIRouter()
 
-@app.post(path="/quotes", response_model=list[Saint_Quote])
+
+@router.post("/quotes", response_model=list[Saint_Quote])
 async def st_list_quotes(dto: Saint_Quote_Input):
-    return  quote_service.get_patristic_text(dto.passagem, dto.father)
+    try:
+        resultado = await quote_service.get_patristic_text(dto.passagem, dto.father)
+        if not resultado:
+            raise HTTPException(
+                status_code=404,
+                detail="Nenhuma citação patrística verificável encontrada.",
+            )
+        return resultado
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
