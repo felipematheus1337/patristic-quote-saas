@@ -2,9 +2,10 @@ import asyncio
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
-
-from openai import OpenAI
-from dotenv import load_dotenv
+import redis.asyncio as redis
+import json
+from infra.openai_client import client
+import os
 
 from utils.helper import (
     extract_text_from_response,
@@ -17,8 +18,6 @@ from const import (
     PADRES_MEDIA_COBERTURA,
 )
 
-load_dotenv()
-client = OpenAI(timeout=30.0)  # ponto 3 — timeout global
 
 BAIXA_ORTODOXOS_MODERNOS = [
     "São Serafim de Sarov",
@@ -69,8 +68,31 @@ BAIXA_OUTROS = [
     "São Epifânio de Salamina",
 ]
 
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "localhost"),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    decode_responses=True,
+)
 
-# ── ponto 3 — try/except isolado por candidato ──────────────────────────────
+CACHE_TTL = 60 * 60 * 24 * 30
+
+
+def _build_cache_key(passagem: str, padre: str) -> str:
+    passagem_norm = passagem.lower().strip().replace(" ", "_").replace(":", "_")
+    padre_norm = (
+        padre.lower()
+        .strip()
+        .replace(" ", "_")
+        .replace("ã", "a")
+        .replace("ô", "o")
+        .replace("í", "i")
+        .replace("á", "a")
+        .replace("é", "e")
+        .replace("ç", "c")
+    )
+    return f"patristic:{passagem_norm}:{padre_norm}"
+
+
 def buscar_citacao(passagem: str, padre: str, prompt: str) -> list:
     try:
         response = client.responses.create(
@@ -120,7 +142,6 @@ def deduplicate(citacoes: list) -> list:
     return unicas
 
 
-# ── ponto 2 — paralelo com ThreadPoolExecutor ────────────────────────────────
 def _buscar_em_paralelo(passagem: str, fila: list[str], prompt: str) -> list:
     citacoes = []
 
@@ -144,16 +165,33 @@ def _buscar_em_paralelo(passagem: str, fila: list[str], prompt: str) -> list:
     return citacoes
 
 
-# ── ponto 1 — versão async para o FastAPI não bloquear o event loop ──────────
 async def get_patristic_text(passagem: str, padre: str) -> list:
+    cache_key = _build_cache_key(passagem, padre)
+
+    # 1. tenta o cache primeiro
+    cached = await redis_client.get(cache_key)
+    if cached:
+        print(f"[CACHE HIT] {cache_key}")
+        return json.loads(cached)
+
+    print(f"[CACHE MISS] {cache_key} — chamando OpenAI")
+
+    # 2. cache miss — busca na OpenAI
     prompt = load_prompt("prompts/search.md")
     fila = montar_fila(padre)
-
-    print(f"[FILA] {fila}")
 
     loop = asyncio.get_event_loop()
     citacoes = await loop.run_in_executor(
         None, partial(_buscar_em_paralelo, passagem, fila, prompt)
     )
 
-    return deduplicate(citacoes)[:5]
+    resultado = deduplicate(citacoes)[:5]
+
+    # 3. salva no cache só se encontrou algo
+    if resultado:
+        await redis_client.setex(
+            cache_key, CACHE_TTL, json.dumps(resultado, ensure_ascii=False)
+        )
+        print(f"[CACHE SET] {cache_key} — TTL: {CACHE_TTL}s")
+
+    return resultado

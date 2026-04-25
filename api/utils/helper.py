@@ -21,9 +21,7 @@ FONTES_MODERNAS_ORTODOXAS = [
 ]
 
 TODAS_FONTES_AUTORIZADAS = (
-    FONTES_PATRISTICAS
-    + FONTES_MODERNAS_CATOLICAS
-    + FONTES_MODERNAS_ORTODOXAS
+    FONTES_PATRISTICAS + FONTES_MODERNAS_CATOLICAS + FONTES_MODERNAS_ORTODOXAS
 )
 
 ALIASES = {
@@ -37,6 +35,7 @@ ALIASES = {
     "Glossa Ordinária": None,  # None = filtrar fora
 }
 
+
 def normalizar_nomes(citacoes: list) -> list:
     normalizadas = []
     for c in citacoes:
@@ -49,6 +48,7 @@ def normalizar_nomes(citacoes: list) -> list:
         normalizadas.append(c)
     return normalizadas
 
+
 def extract_text_from_response(response) -> str:
     for block in response.output:
         if block.type == "message":
@@ -57,12 +57,13 @@ def extract_text_from_response(response) -> str:
                     return content.text
     return ""
 
+
 def parse_response(text: str) -> list:
     if not text.strip():
         print("[AVISO] Resposta vazia do modelo.")
         return []
 
-    match = re.search(r'\[.*?\]', text, re.DOTALL)
+    match = re.search(r"\[.*?\]", text, re.DOTALL)
     if match:
         try:
             return json.loads(match.group())
@@ -77,11 +78,17 @@ def parse_response(text: str) -> list:
         print(f"[DEBUG] Texto recebido:\n{text[:500]}")
         return []
 
-def validar_fontes(resultados: list) -> list:
+
+def validar_fontes(citacoes: list) -> list:
     return [
-        r for r in resultados
-        if any(dominio in r.get("fonte", "") for dominio in TODAS_FONTES_AUTORIZADAS)
+        c
+        for c in citacoes
+        if c.get("confianca") in ("alta", "media")
+        and c.get("texto")
+        and c.get("fonte")
+        and c.get("nome")
     ]
+
 
 def load_prompt(path: str) -> str:
     with open(path, "r", encoding="utf-8") as file:
