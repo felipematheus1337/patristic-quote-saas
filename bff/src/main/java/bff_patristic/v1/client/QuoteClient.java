@@ -12,5 +12,5 @@ import java.util.List;
 public interface QuoteClient {
 
     @GetMapping("api/v1/quotes")
-    public List<SaintQuote> find(@RequestBody SaintQuoteDTO dto);
+    List<SaintQuote> find(@RequestBody SaintQuoteDTO dto);
 }

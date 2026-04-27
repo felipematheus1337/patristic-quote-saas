@@ -1,12 +1,20 @@
 package bff_patristic.v1.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Confianca {
+    ALTA,
+    MEDIA,
+    BAIXA;
 
-    ALTA("alta"), MEDIA("media"), BAIXA("baixa");
+    @JsonCreator
+    public static Confianca fromValue(String value) {
+        return Confianca.valueOf(value.toUpperCase());
+    }
 
-    private final String valor;
-
-    Confianca(String valor) {
-        this.valor = valor;
+    @JsonValue
+    public String toValue() {
+        return this.name().toLowerCase();
     }
 }

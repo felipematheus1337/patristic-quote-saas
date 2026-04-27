@@ -87,6 +87,7 @@ def validar_fontes(citacoes: list) -> list:
         and c.get("texto")
         and c.get("fonte")
         and c.get("nome")
+        and c.get("icone_url")
     ]
 
 

@@ -7,6 +7,7 @@ class Saint_Quote(BaseModel):
     texto: str
     fonte: str
     confianca: Literal["alta", "media", "baixa"]
+    icone_url: str
 
 
 class Saint_Quote_Input(BaseModel):

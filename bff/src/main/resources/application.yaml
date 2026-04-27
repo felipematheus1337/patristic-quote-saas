@@ -1,6 +1,13 @@
 spring:
   application:
     name: bff-quotes
+  cloud:
+    openfeign:
+      client:
+        config:
+          quoteClient:
+            connectTimeout: 10000
+            readTimeout: 120000
 
 server:
   port: 8082
@@ -8,4 +15,16 @@ server:
 
 services:
   fastapi:
-    base-url: http://localhost:8080/
+    base-url: http://localhost:8000/
+
+resilience4j:
+  timelimiter:
+    instances:
+      fastapi:
+        timeoutDuration: 120s
+  circuitbreaker:
+    instances:
+      fastapi:
+        slidingWindowSize: 5
+        failureRateThreshold: 60
+        waitDurationInOpenState: 30s
