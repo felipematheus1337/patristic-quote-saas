@@ -4,7 +4,7 @@ from functools import partial
 
 from utils.helper import load_prompt, normalizar_nomes
 
-from cache import PatristicCache
+from cache.cache import PatristicCache
 from search.icon_search import IconSearchService
 from search.quote_search import PatristicQuoteSearchService
 from utils.quote_utils import (
@@ -12,6 +12,7 @@ from utils.quote_utils import (
     garantir_campo_icone,
     remover_icones_do_modelo,
 )
+from utils.quote_utils import limpar_citacoes
 
 
 class PatristicQuoteOrchestrator:
@@ -61,6 +62,9 @@ class PatristicQuoteOrchestrator:
         citacoes = remover_icones_do_modelo(citacoes)
         citacoes = garantir_campo_icone(citacoes)
 
+        citacoes = normalizar_nomes(citacoes)
+
+        citacoes = limpar_citacoes(citacoes)
         citacoes = normalizar_nomes(citacoes)
 
         citacoes = remover_icones_do_modelo(citacoes)

@@ -2,12 +2,9 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from infra.openai_client import client
-from utils.helper import (
-    extract_text_from_response,
-    validar_fontes,
-)
+from utils.helper import extract_text_from_response, validar_fontes
 
-from const import (
+from const.constantes import (
     PADRES_ALTA_COBERTURA,
     PADRES_MEDIA_COBERTURA,
 )
@@ -17,7 +14,8 @@ from application.constants.constantes import (
     BAIXA_OUTROS,
     PRIORIDADE_EVANGELHOS,
 )
-from application.constants.constantes import (
+
+from utils.quote_utils import (
     garantir_campo_icone,
     remover_icones_do_modelo,
 )

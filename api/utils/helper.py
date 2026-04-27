@@ -34,6 +34,9 @@ ALIASES = {
     "Tomás de Aquino": "São Tomás de Aquino",
     "Glossa Ordinária": None,
     "Santo Agostinho": "Santo Agostinho de Hipona",
+    "Hilario de Poitiers": "São Hilário de Poitiers",
+    "Hilário de Poitiers": "São Hilário de Poitiers",
+    "São Hilário": "São Hilário de Poitiers",
 }
 
 

@@ -17,6 +17,33 @@ def remover_icones_do_modelo(citacoes: list) -> list:
     return citacoes
 
 
+def limpar_caracteres_invalidos(texto: str) -> str:
+    if not isinstance(texto, str):
+        return texto
+
+    substituicoes = {
+        "\x13": "á",
+        "\x1e": "ã",
+        "\x1a3": "ó",
+    }
+
+    for ruim, bom in substituicoes.items():
+        texto = texto.replace(ruim, bom)
+
+    # remove caracteres de controle restantes
+    texto = "".join(ch for ch in texto if ch.isprintable() or ch in ("\n", "\t"))
+
+    return texto
+
+
+def limpar_citacoes(citacoes: list) -> list:
+    for c in citacoes:
+        c["nome"] = limpar_caracteres_invalidos(c.get("nome", ""))
+        c["texto"] = limpar_caracteres_invalidos(c.get("texto", ""))
+        c["fonte"] = limpar_caracteres_invalidos(c.get("fonte", ""))
+    return citacoes
+
+
 def deduplicate(citacoes: list) -> list:
     vistos_texto = set()
     vistos_nome = set()
