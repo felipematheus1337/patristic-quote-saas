@@ -3,6 +3,7 @@ package bff_patristic.v1.service;
 import bff_patristic.v1.application.dto.SaintQuoteDTO;
 import bff_patristic.v1.client.QuoteClient;
 import bff_patristic.v1.domain.SaintQuote;
+import bff_patristic.v1.exception.FastApiUnavailableException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class QuoteService {
     }
 
     public List<SaintQuote> fallbackQuotes(SaintQuoteDTO dto, Exception e) {
-        return Collections.emptyList();
+        throw new FastApiUnavailableException("Falha ao consultar citações patrísticas.", e);
+
     }
 }

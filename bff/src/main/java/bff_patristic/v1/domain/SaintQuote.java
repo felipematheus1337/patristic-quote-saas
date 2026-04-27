@@ -1,6 +1,7 @@
 package bff_patristic.v1.domain;
 
 import bff_patristic.v1.domain.enums.Confianca;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SaintQuote {
 
@@ -8,6 +9,8 @@ public class SaintQuote {
     private String texto;
     private String fonte;
     private Confianca confianca;
+    @JsonProperty(value = "icone_url")
+    private String iconeUrl;
 
     public SaintQuote() {
     }
@@ -50,4 +53,13 @@ public class SaintQuote {
     public void setConfianca(Confianca confianca) {
         this.confianca = confianca;
     }
+
+    public String getIconeUrl() {
+        return iconeUrl;
+    }
+
+    public void setIconeUrl(String iconeUrl) {
+        this.iconeUrl = iconeUrl;
+    }
 }
+
