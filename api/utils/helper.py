@@ -32,7 +32,8 @@ ALIASES = {
     "Agostinho": "Santo Agostinho de Hipona",
     "Jerônimo": "São Jerônimo",
     "Tomás de Aquino": "São Tomás de Aquino",
-    "Glossa Ordinária": None,  # None = filtrar fora
+    "Glossa Ordinária": None,
+    "Santo Agostinho": "Santo Agostinho de Hipona",
 }
 
 
@@ -80,15 +81,19 @@ def parse_response(text: str) -> list:
 
 
 def validar_fontes(citacoes: list) -> list:
-    return [
-        c
-        for c in citacoes
-        if c.get("confianca") in ("alta", "media")
-        and c.get("texto")
-        and c.get("fonte")
-        and c.get("nome")
-        and c.get("icone_url")
-    ]
+    validadas = []
+
+    for c in citacoes:
+        if (
+            c.get("confianca") in ("alta", "media")
+            and c.get("texto")
+            and c.get("fonte")
+            and c.get("nome")
+        ):
+            c.setdefault("icone_url", None)
+            validadas.append(c)
+
+    return validadas
 
 
 def load_prompt(path: str) -> str:

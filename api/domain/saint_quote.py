@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 
 
 class Saint_Quote(BaseModel):
@@ -7,7 +7,7 @@ class Saint_Quote(BaseModel):
     texto: str
     fonte: str
     confianca: Literal["alta", "media", "baixa"]
-    icone_url: str
+    icone_url: Optional[str] = None
 
 
 class Saint_Quote_Input(BaseModel):

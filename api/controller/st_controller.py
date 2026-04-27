@@ -5,7 +5,9 @@ from application import service as quote_service
 router = APIRouter()
 
 
-@router.post("/quotes", response_model=list[Saint_Quote])
+@router.post(
+    "/quotes", response_model=list[Saint_Quote], response_model_exclude_none=False
+)
 async def st_list_quotes(dto: Saint_Quote_Input):
     try:
         resultado = await quote_service.get_patristic_text(dto.passagem, dto.father)
